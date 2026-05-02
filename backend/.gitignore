@@ -1,0 +1,27 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Env files
+.env
+.env.local
+
+# Temp files for download processing
+test_fb*
+*.mp4
+*.m4a
+*.webm
+*.part
+*.ytdl
