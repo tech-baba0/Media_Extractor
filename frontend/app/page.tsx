@@ -39,6 +39,11 @@ export default function Home() {
       // Clean up the URL bar
       window.history.replaceState({}, '', '/');
     }
+
+    // Register Service Worker for PWABuilder compliance
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
   }, []);
 
   const saveToHistory = (data: any, fetchUrl: string) => {
