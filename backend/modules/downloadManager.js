@@ -31,66 +31,103 @@ class DownloadManager {
                     const tempFile = path.join(os.tmpdir(), `${uuidv4()}.mp4`);
                     console.log(`Downloading and merging to temp file: ${tempFile}`);
 
-                    const subprocess = youtubedl.exec(url, {
-                        ...baseOptions,
-                        f: formatId,
-                        o: tempFile,
-                        mergeOutputFormat: 'mp4',
-                        ffmpegLocation: ffmpegStatic
-                    });
-
-                    // Must catch the promise to prevent Node crashes
-                    subprocess.catch((err) => {
-                        console.error('yt-dlp process error:', err.message);
-                        if (!res.headersSent) res.status(500).end('Streaming error');
-                        reject(err);
-                    });
-
-                    subprocess.on('close', (code) => {
-                        if (code !== 0) {
-                            return; // Error already handled by catch()
+                    const startDownload = (useCookies) => {
+                        const options = {
+                            ...baseOptions,
+                            f: formatId,
+                            o: tempFile,
+                            mergeOutputFormat: 'mp4',
+                            ffmpegLocation: ffmpegStatic
+                        };
+                        
+                        if (!useCookies) {
+                            delete options.cookies;
                         }
 
-                        // Stream the file to the user
-                        const readStream = fs.createReadStream(tempFile);
-                        readStream.pipe(res);
+                        const subprocess = youtubedl.exec(url, options);
 
-                        readStream.on('end', () => {
-                            fs.unlink(tempFile, (err) => {
-                                if (err) console.error('Failed to delete temp file:', err);
+                        subprocess.catch((err) => {
+                            if (useCookies) {
+                                console.log('Download failed with cookies, retrying without cookies...');
+                                startDownload(false);
+                            } else {
+                                console.error('yt-dlp process error:', err.message);
+                                if (!res.headersSent) res.status(500).end('Streaming error');
+                                reject(err);
+                            }
+                        });
+
+                        subprocess.on('close', (code) => {
+                            if (code !== 0) {
+                                return; // Error handled by catch
+                            }
+
+                            const readStream = fs.createReadStream(tempFile);
+                            readStream.pipe(res);
+
+                            readStream.on('end', () => {
+                                fs.unlink(tempFile, (err) => {
+                                    if (err) console.error('Failed to delete temp file:', err);
+                                });
+                                resolve();
                             });
-                            resolve();
-                        });
 
-                        readStream.on('error', (err) => {
-                            console.error('Error reading temp file:', err);
-                            fs.unlink(tempFile, () => {});
-                            reject(err);
+                            readStream.on('error', (err) => {
+                                console.error('Error reading temp file:', err);
+                                fs.unlink(tempFile, () => {});
+                                reject(err);
+                            });
                         });
-                    });
+                    };
+
+                    startDownload(!!baseOptions.cookies);
+
                 } else {
                     // Single format, can stream directly to stdout
-                    try {
-                        const subprocess = youtubedl.exec(url, {
+                    const startStreamDownload = (useCookies) => {
+                        const options = {
                             ...baseOptions,
                             f: formatId,
                             o: '-' // output to stdout
-                        });
+                        };
                         
-                        subprocess.catch((err) => {
-                            console.error('yt-dlp stream error:', err.message);
-                            if (!res.headersSent) res.status(500).end('Streaming error');
-                            reject(err);
-                        });
-                        
-                        subprocess.stdout.pipe(res);
-                        
-                        subprocess.on('close', () => resolve());
-                    } catch (err) {
-                        console.error('Failed to initiate yt-dlp stream:', err);
-                        if (!res.headersSent) res.status(500).json({ error: 'Failed to initiate download stream' });
-                        reject(err);
-                    }
+                        if (!useCookies) {
+                            delete options.cookies;
+                        }
+
+                        try {
+                            const subprocess = youtubedl.exec(url, options);
+                            
+                            subprocess.catch((err) => {
+                                if (useCookies) {
+                                    console.log('yt-dlp stream failed with cookies, retrying without cookies...');
+                                    startStreamDownload(false);
+                                } else {
+                                    console.error('yt-dlp stream error:', err.message);
+                                    if (!res.headersSent) res.status(500).end('Streaming error');
+                                    reject(err);
+                                }
+                            });
+                            
+                            subprocess.stdout.pipe(res);
+                            
+                            subprocess.on('close', (code) => {
+                                if (code === 0 || !useCookies) resolve();
+                            });
+                        } catch (err) {
+                            if (useCookies) {
+                                console.log('Failed to initiate yt-dlp stream with cookies, retrying without...');
+                                startStreamDownload(false);
+                            } else {
+                                console.error('Failed to initiate yt-dlp stream:', err);
+                                if (!res.headersSent) res.status(500).json({ error: 'Failed to initiate download stream' });
+                                reject(err);
+                            }
+                        }
+                    };
+
+                    startStreamDownload(!!baseOptions.cookies);
+
                 }
             });
         }

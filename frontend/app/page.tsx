@@ -49,20 +49,22 @@ export default function Home() {
         </div>
 
         {/* Input Card */}
-        <form onSubmit={handleFetch} className="glass-panel p-2 pl-6 flex items-center w-full max-w-2xl shadow-2xl relative z-20 transition-all focus-within:ring-2 focus-within:ring-indigo-500/50">
-          <FaLink className="text-gray-400 mr-3 text-xl" />
-          <input 
-            type="url" 
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste video URL here..." 
-            className="flex-1 bg-transparent border-none outline-none text-white placeholder-gray-500 py-4"
-            required
-          />
+        <form onSubmit={handleFetch} className="glass-panel p-2 pl-4 sm:pl-6 flex flex-col sm:flex-row items-center w-full max-w-2xl shadow-2xl relative z-20 transition-all focus-within:ring-2 focus-within:ring-indigo-500/50 gap-2 sm:gap-0">
+          <div className="flex w-full items-center flex-1">
+            <FaLink className="text-gray-400 mr-3 text-xl shrink-0" />
+            <input 
+              type="url" 
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Paste video URL here..." 
+              className="flex-1 w-full bg-transparent border-none outline-none text-white placeholder-gray-500 py-2 sm:py-4"
+              required
+            />
+          </div>
           <button 
             type="submit" 
             disabled={loading || !url}
-            className="ml-2 glass-button !px-8 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto sm:ml-2 glass-button !px-8 py-3 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? <FaSpinner className="animate-spin" /> : <FaSearch />}
             <span>Fetch</span>

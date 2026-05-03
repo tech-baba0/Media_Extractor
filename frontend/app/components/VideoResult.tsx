@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FaDownload } from 'react-icons/fa';
+import { FaDownload, FaCircleNotch } from 'react-icons/fa';
 
 interface Format {
   format_id?: string;
@@ -19,13 +19,20 @@ interface VideoData {
 
 export default function VideoResult({ videoData, sourceUrl }: { videoData: VideoData; sourceUrl: string }) {
   const [selectedQuality, setSelectedQuality] = useState<string>(videoData.formats[0]?.quality || '');
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = () => {
+    setIsDownloading(true);
     const selectedFormat = videoData.formats.find(f => f.quality === selectedQuality);
     const formatId = selectedFormat?.format_id || '';
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     const downloadUrl = `${apiUrl}/api/download?url=${encodeURIComponent(sourceUrl)}&quality=${encodeURIComponent(selectedQuality)}&format_id=${encodeURIComponent(formatId)}`;
     window.location.href = downloadUrl;
+
+    // Reset loader after 15 seconds (assumes the server has started the file attachment download by then)
+    setTimeout(() => {
+      setIsDownloading(false);
+    }, 15000);
   };
 
   return (
@@ -52,15 +59,15 @@ export default function VideoResult({ videoData, sourceUrl }: { videoData: Video
         </div>
 
         {/* Right: Info & Quality Selector */}
-        <div className="w-full md:w-7/12 flex flex-col justify-center">
+        <div className="w-full md:w-7/12 flex flex-col justify-center min-w-0">
           <div>
-            <h3 className="text-2xl font-extrabold text-white mb-2 line-clamp-2 tracking-tight" title={videoData.title}>
+            <h3 className="text-2xl font-extrabold text-white mb-2 line-clamp-3 break-words tracking-tight" title={videoData.title}>
               {videoData.title}
             </h3>
             <p className="text-sm text-gray-400 mb-5">Select format to download:</p>
             
             {/* Quality Selector */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {videoData.formats.map((format, idx) => {
                 const isSelected = selectedQuality === format.quality;
                 return (
@@ -73,23 +80,23 @@ export default function VideoResult({ videoData, sourceUrl }: { videoData: Video
                         : 'bg-[#2b2d42] border-transparent hover:bg-[#34354f]'
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
                       {/* Custom Radio Button */}
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${
                         isSelected ? 'border-[#5c5bd6]' : 'border-gray-500'
                       }`}>
                         {isSelected && <div className="w-2.5 h-2.5 bg-[#5c5bd6] rounded-full" />}
                       </div>
-                      <span className="text-lg font-bold text-gray-100">{format.quality}</span>
+                      <span className="text-lg font-bold text-gray-100 whitespace-nowrap">{format.quality}</span>
                       {format.size && (
-                        <span className="text-xs font-medium text-gray-400 ml-2">
+                        <span className="text-xs font-medium text-gray-400 ml-1 sm:ml-2 truncate">
                           ({format.size})
                         </span>
                       )}
                     </div>
                     
                     {/* Format Badge */}
-                    <span className="text-xs font-bold text-gray-400 bg-black/20 px-3 py-1 rounded-md uppercase tracking-wider">
+                    <span className="text-xs font-bold text-gray-400 bg-black/20 px-3 py-1 rounded-md uppercase tracking-wider shrink-0 ml-2">
                       {format.type}
                     </span>
                   </label>
@@ -100,10 +107,21 @@ export default function VideoResult({ videoData, sourceUrl }: { videoData: Video
 
           <button 
             onClick={handleDownload}
-            className="w-full flex items-center justify-center gap-3 py-4 text-lg font-bold rounded-xl bg-[#5c5bd6] hover:bg-[#4a49c4] text-white transition-all shadow-lg active:scale-[0.98]"
+            disabled={isDownloading}
+            className="w-full relative overflow-hidden flex items-center justify-center gap-3 py-4 text-lg font-bold rounded-xl bg-[#5c5bd6] hover:bg-[#4a49c4] text-white transition-all shadow-lg active:scale-[0.98] disabled:opacity-90 disabled:cursor-wait"
           >
-            <FaDownload />
-            Download {selectedQuality}
+            {isDownloading ? (
+              <>
+                <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+                <FaCircleNotch className="animate-spin text-2xl relative z-10" />
+                <span className="relative z-10 tracking-wide">Processing Media...</span>
+              </>
+            ) : (
+              <>
+                <FaDownload />
+                <span>Download {selectedQuality}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -12,6 +12,10 @@ class UniversalExtractor extends BaseExtractor {
                 noCheckCertificates: true,
                 noWarnings: true,
                 preferFreeFormats: true,
+                ignoreNoFormatsError: true,
+                noPlaylist: true,
+                skipDownload: true,
+                socketTimeout: 10,
                 addHeader: [
                     'referer:youtube.com',
                     'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
@@ -22,20 +26,28 @@ class UniversalExtractor extends BaseExtractor {
                 ytOptions.cookies = cookiesPath;
             }
 
-            const info = await youtubedl(url, ytOptions);
+            let info = await youtubedl(url, ytOptions);
             
+            let allFormats = info.formats || [];
+            let videoFormats = allFormats.filter(f => f.vcodec && f.vcodec !== 'none' && !f.format_id.startsWith('sb'));
+
+            // Fallback: If cookies are flagged/expired, YouTube may return only storyboards (sb)
+            if (videoFormats.length === 0 && ytOptions.cookies) {
+                delete ytOptions.cookies;
+                info = await youtubedl(url, ytOptions);
+                allFormats = info.formats || [];
+                videoFormats = allFormats.filter(f => f.vcodec && f.vcodec !== 'none' && !f.format_id.startsWith('sb'));
+            }
+
             const formatSize = (bytes) => {
                 if (!bytes) return 'Unknown size';
                 const mb = bytes / (1024 * 1024);
                 return `${mb.toFixed(2)} MB`;
             };
-
-            // Filter out audio-only formats
-            const videoFormats = info.formats.filter(f => f.vcodec !== 'none' && f.ext === 'mp4');
             
             // Map to our generic format
             const mappedFormats = videoFormats.map(format => {
-                const height = format.height || format.format_note;
+                const height = format.height || (format.resolution ? format.resolution.split('x')[1] : null) || format.format_note || 'Unknown';
                 const sizeBytes = format.filesize || format.filesize_approx || 0;
                 
                 // If it lacks audio, merge with best audio, fallback to best overall if audio is missing
