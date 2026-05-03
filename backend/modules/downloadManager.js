@@ -20,12 +20,19 @@ class DownloadManager {
                 res.setHeader('Content-Type', 'video/mp4');
                 res.setHeader('Content-Disposition', `attachment; filename="downloaded_video.mp4"`);
 
+                const cookiesPath = path.join(__dirname, '..', 'cookies.txt');
+                const baseOptions = {};
+                if (fs.existsSync(cookiesPath)) {
+                    baseOptions.cookies = cookiesPath;
+                }
+
                 // If the format requires merging video and audio, yt-dlp cannot output to stdout
                 if (formatId.includes('+')) {
                     const tempFile = path.join(os.tmpdir(), `${uuidv4()}.mp4`);
                     console.log(`Downloading and merging to temp file: ${tempFile}`);
 
                     const subprocess = youtubedl.exec(url, {
+                        ...baseOptions,
                         f: formatId,
                         o: tempFile,
                         mergeOutputFormat: 'mp4',
@@ -65,6 +72,7 @@ class DownloadManager {
                     // Single format, can stream directly to stdout
                     try {
                         const subprocess = youtubedl.exec(url, {
+                            ...baseOptions,
                             f: formatId,
                             o: '-' // output to stdout
                         });

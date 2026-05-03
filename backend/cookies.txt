@@ -1,0 +1,20 @@
+# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+.youtube.com	TRUE	/	TRUE	0	LOGIN_INFO	AFmmF2swRAIgQjRaVjSQrP-V4ujsnEE06mXNKGLL1i1cPJLttxuSNy8CIAxx1PJAUg-gPzOWYBd38qvi9whF_Z_eB13SyZElzYBo:QUQ3MjNmejVIamVkN0ptbVJCUlhMRHhEdDdtZGwwTk9MZ0JYbFJMeUttcERWRlRjcjNGcF94TGs5UWdpLVZzb3BRM0xYbXRQVTc3N2wxTks1SEV1aEZiRUIwdUZyWGx4VTZ0QjNKWjVCY3pZWnVaR213ZFNqVk1rc3FHYnkxbTNwR1NoOGJnMzlmcTI3SmZhNnpna0pHeXZ1MGdmajJGODhR
+.youtube.com	TRUE	/	FALSE	0	SID	g.a0009QiDd3WQoPmiqjb5hpmDFW5s0XINXWbR8vKs-qkHVPxeNRH-LZ-QqWs63mn3lVRILje60gACgYKAQQSARASFQHGX2MiSMaSQEX928ou2tRfpfC3yxoVAUF8yKqT20oA8KVUqBcm8iwseNow0076
+.youtube.com	TRUE	/	TRUE	0	__Secure-1PSID	g.a0009QiDd3WQoPmiqjb5hpmDFW5s0XINXWbR8vKs-qkHVPxeNRH-LElZDNMJzZIsVZsI7j8awgACgYKAeUSARASFQHGX2MirNoya74k6EYvZTFq0LwWOhoVAUF8yKooGlX9zNPwxxczLCVsKZT90076
+.youtube.com	TRUE	/	TRUE	0	__Secure-3PSID	g.a0009QiDd3WQoPmiqjb5hpmDFW5s0XINXWbR8vKs-qkHVPxeNRH--_zFEqE0MHOgH5GS1rJNZQACgYKAfQSARASFQHGX2Mi8BMuYXOmQH78Kex-X5i1lxoVAUF8yKpURHhErmFafewhjIrAohqd0076
+.youtube.com	TRUE	/	FALSE	0	HSID	Ad-1ueAt5PI3QoAIY
+.youtube.com	TRUE	/	TRUE	0	SSID	AQzQ0ilpwYAYKGTIW
+.youtube.com	TRUE	/	FALSE	0	APISID	443jotAquc0n8JzI/Ap9hcvUYTkisIxjNH
+.youtube.com	TRUE	/	TRUE	0	SAPISID	Gn_D_KjOSKkUpx9h/AQ-LnUsx2buB-e8MU
+.youtube.com	TRUE	/	TRUE	0	__Secure-1PAPISID	Gn_D_KjOSKkUpx9h/AQ-LnUsx2buB-e8MU
+.youtube.com	TRUE	/	TRUE	0	__Secure-3PAPISID	Gn_D_KjOSKkUpx9h/AQ-LnUsx2buB-e8MU
+.youtube.com	TRUE	/	TRUE	0	PREF	f4=4000000&f6=40000000&tz=Asia.Calcutta
+.youtube.com	TRUE	/	TRUE	0	__Secure-1PSIDTS	sidts-CjIBhkeRd3RoKs5wVTIb-Z6-Lt9QVdu0dxQfDkBEJqwYJQCxYn1YV3w5OFAxXeyotK3N6RAA
+.youtube.com	TRUE	/	TRUE	0	__Secure-3PSIDTS	sidts-CjIBhkeRd3RoKs5wVTIb-Z6-Lt9QVdu0dxQfDkBEJqwYJQCxYn1YV3w5OFAxXeyotK3N6RAA
+.youtube.com	TRUE	/	FALSE	0	SIDCC	AKEyXzVt7UERFNkWEkJqonL0CNLEHI_QfzU0Uv5TZiIAKr6bg5fyNxj9azs6PAlgZ2syNA6y
+.youtube.com	TRUE	/	TRUE	0	__Secure-1PSIDCC	AKEyXzVkDe8s5pZ7ld46x6kwKaLt6Wd35euWrlWd-0kl19yzlNi0EnpZ9gQ34srGw7ErdnF44w
+.youtube.com	TRUE	/	TRUE	0	__Secure-3PSIDCC	AKEyXzUzZg24h8YDps-VPn7sfON1JaDYXlOEuSmsmRdBMz9sGmd0tn5trrjQW-IesgqHJGrb0Q

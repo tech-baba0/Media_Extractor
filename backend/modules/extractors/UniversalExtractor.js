@@ -1,10 +1,13 @@
 const BaseExtractor = require('./BaseExtractor');
 const youtubedl = require('youtube-dl-exec');
+const fs = require('fs');
+const path = require('path');
 
 class UniversalExtractor extends BaseExtractor {
     async analyze(url) {
         try {
-            const info = await youtubedl(url, {
+            const cookiesPath = path.join(__dirname, '..', '..', 'cookies.txt');
+            const ytOptions = {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
@@ -13,7 +16,13 @@ class UniversalExtractor extends BaseExtractor {
                     'referer:youtube.com',
                     'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
                 ]
-            });
+            };
+
+            if (fs.existsSync(cookiesPath)) {
+                ytOptions.cookies = cookiesPath;
+            }
+
+            const info = await youtubedl(url, ytOptions);
             
             const formatSize = (bytes) => {
                 if (!bytes) return 'Unknown size';
