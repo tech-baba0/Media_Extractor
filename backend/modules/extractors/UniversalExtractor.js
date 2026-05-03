@@ -80,12 +80,38 @@ class UniversalExtractor extends BaseExtractor {
                 }
             }
 
+            // Audio formats filtering
+            const rawAudioFormats = allFormats.filter(f => f.vcodec === 'none' && f.acodec !== 'none');
+            const mappedAudioFormats = rawAudioFormats.map(format => {
+                const abr = format.abr || format.tbr || 0;
+                return {
+                    format_id: format.format_id,
+                    quality: abr ? `${Math.round(abr)} kbps` : 'Audio',
+                    url: format.url,
+                    type: 'mp3', // We explicitly convert all audio to mp3 in downloadManager
+                    size: formatSize(format.filesize || format.filesize_approx || 0),
+                    _abr: abr
+                };
+            }).sort((a, b) => b._abr - a._abr);
+
+            // Deduplicate audio by quality string
+            const uniqueAudioFormats = [];
+            const seenAudioQualities = new Set();
+            for (const f of mappedAudioFormats) {
+                if (!seenAudioQualities.has(f.quality)) {
+                    seenAudioQualities.add(f.quality);
+                    delete f._abr;
+                    uniqueAudioFormats.push(f);
+                }
+            }
+
             return {
                 title: info.title || 'Video',
                 thumbnail: info.thumbnail || '',
                 formats: uniqueFormats.length > 0 ? uniqueFormats : [
                     { quality: 'Unknown', url: url, type: 'mp4', size: 'Unknown size' }
-                ]
+                ],
+                audioFormats: uniqueAudioFormats
             };
         } catch (error) {
             console.error('Universal Extractor Error:', error);

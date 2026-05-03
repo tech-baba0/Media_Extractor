@@ -22,14 +22,18 @@ router.post('/analyze', async (req, res) => {
 });
 
 router.get('/download', async (req, res) => {
-    const { url, format_id } = req.query;
+    const { url, format_id, startTime, endTime, isAudio } = req.query;
 
     if (!url) {
         return res.status(400).json({ error: 'URL is required' });
     }
 
     try {
-        await downloadManager.streamFile(url, format_id, res);
+        await downloadManager.streamFile(url, format_id, res, { 
+            startTime, 
+            endTime, 
+            isAudio: isAudio === 'true' 
+        });
     } catch (error) {
         console.error('Error downloading file:', error);
         if (!res.headersSent) {

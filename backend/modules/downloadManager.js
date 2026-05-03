@@ -14,32 +14,48 @@ class DownloadManager {
      * @param {string} formatId - The optional format_id from yt-dlp.
      * @param {import('express').Response} res - The Express response object.
      */
-    async streamFile(url, formatId, res) {
+    async streamFile(url, formatId, res, requestOptions = {}) {
         if (formatId) {
             return new Promise((resolve, reject) => {
-                res.setHeader('Content-Type', 'video/mp4');
-                res.setHeader('Content-Disposition', `attachment; filename="downloaded_video.mp4"`);
+                const { startTime, endTime, isAudio } = requestOptions;
+                const ext = isAudio ? 'mp3' : 'mp4';
+                res.setHeader('Content-Type', isAudio ? 'audio/mpeg' : 'video/mp4');
+                res.setHeader('Content-Disposition', `attachment; filename="downloaded_media.${ext}"`);
 
                 const cookiesPath = path.join(__dirname, '..', 'cookies.txt');
                 const baseOptions = {};
                 if (fs.existsSync(cookiesPath)) {
                     baseOptions.cookies = cookiesPath;
                 }
+                
+                if (startTime && endTime) {
+                    baseOptions.downloadSections = `*${startTime}-${endTime}`;
+                }
+                
+                if (isAudio) {
+                    baseOptions.extractAudio = true;
+                    baseOptions.audioFormat = 'mp3';
+                }
 
-                // If the format requires merging video and audio, yt-dlp cannot output to stdout
-                if (formatId.includes('+')) {
-                    const tempFile = path.join(os.tmpdir(), `${uuidv4()}.mp4`);
-                    console.log(`Downloading and merging to temp file: ${tempFile}`);
+                const needsTempFile = formatId.includes('+') || (startTime && endTime) || isAudio;
+
+                // If the format requires merging video and audio, or if we are trimming, we must output to a temp file
+                if (needsTempFile) {
+                    const tempFile = path.join(os.tmpdir(), `${uuidv4()}.${ext}`);
+                    console.log(`Downloading and processing to temp file: ${tempFile}`);
 
                     const startDownload = (useCookies) => {
                         const options = {
                             ...baseOptions,
                             f: formatId,
                             o: tempFile,
-                            mergeOutputFormat: 'mp4',
                             ffmpegLocation: ffmpegStatic
                         };
                         
+                        if (formatId.includes('+') && !isAudio) {
+                            options.mergeOutputFormat = ext;
+                        }
+
                         if (!useCookies) {
                             delete options.cookies;
                         }
